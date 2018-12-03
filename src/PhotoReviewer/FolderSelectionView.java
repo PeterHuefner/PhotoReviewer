@@ -28,7 +28,7 @@ public class FolderSelectionView implements BaseView {
 				if (chooser.showOpenDialog(WindowManager.mainFrame) == JFileChooser.APPROVE_OPTION) {
 					File directory = chooser.getSelectedFile();
 
-					ReviewView reviewView = new ReviewView(directory);
+					ReviewView reviewView = new ReviewView(directory, WindowManager.mainFrame);
 
 					WindowManager.maximizeFrame(WindowManager.mainFrame);
 					WindowManager.showPanelInFrame(reviewView, WindowManager.mainFrame);

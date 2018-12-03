@@ -92,6 +92,14 @@ public class ImageView implements BaseView {
 			targetWidth = (imageWidth / imageHeight) * maxHeight;
 		}
 
+		if (targetHeight == 0) {
+			targetHeight = imageHeight;
+		}
+
+		if (targetWidth == 0) {
+			targetWidth = imageWidth;
+		}
+
 		BufferedImage resizedImg = new BufferedImage((int) targetWidth, (int) targetHeight, BufferedImage.TYPE_INT_RGB);
 		Graphics2D    g2         = resizedImg.createGraphics();
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
