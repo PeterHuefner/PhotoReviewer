@@ -41,11 +41,14 @@ public class ReviewView implements BaseView {
 	private JButton    downButton;
 	private JButton    rightButton;
 	private JButton    leftButton;
+	private JLabel     moveToRightLabel;
+	private JLabel     moveToLeftLabel;
+	private JButton    helpButton;
 
 	protected File directory;
 	protected JFrame frame;
 
-	protected ImageView imageView = null;
+	protected PhotoView imageView = null;
 
 	protected JList focusedList;
 
@@ -96,16 +99,27 @@ public class ReviewView implements BaseView {
 
 					switch (e.getKeyCode()) {
 						case 37 :
-							move("left");
+							if (imageView != null && !frame.isFocused()) {
+								moveItem(imageView.getImageInfo(), "left");
+							} else {
+								move("left");
+							}
 							break;
 						case 39 :
-							move("right");
+							if (imageView != null && !frame.isFocused()) {
+								moveItem(imageView.getImageInfo(), "right");
+							} else {
+								move("right");
+							}
 							break;
 						case 40 :
 							showNextImage();
 							break;
 						case 38 :
 							showPreviousImage();
+							break;
+						case 27 :
+							WindowManager.disposeChildFrame();
 							break;
 					}
 				}
@@ -115,10 +129,26 @@ public class ReviewView implements BaseView {
 			}
 		});
 
+		//region events
+
 		originFilesList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				originFilesList.getSelectedValue();
+				listSelectedValueChanged(originFilesList, e);
+			}
+		});
+
+		trashFilesList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				listSelectedValueChanged(trashFilesList, e);
+			}
+		});
+
+		favoritesFilesList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				listSelectedValueChanged(favoritesFilesList, e);
 			}
 		});
 
@@ -147,6 +177,16 @@ public class ReviewView implements BaseView {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				move("left");
+			}
+		});
+
+		WindowManager.mainFrame.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				super.focusGained(e);
+				if (imageView != null) {
+					WindowManager.disposeChildFrame();
+				}
 			}
 		});
 
@@ -227,6 +267,33 @@ public class ReviewView implements BaseView {
 				}
 			}
 		});
+
+		helpButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				HelpView helpView = new HelpView();
+				WindowManager.createChildFrame("Help");
+				WindowManager.showPanelInFrame(helpView, WindowManager.childFrame);
+
+			}
+		});
+
+
+		//endregion events
+	}
+
+	protected void listSelectedValueChanged(JList changedList, ListSelectionEvent event) {
+		moveToLeftLabel.setText("");
+		moveToRightLabel.setText("");
+
+		if (changedList == originFilesList) {
+			moveToLeftLabel.setText("move to " + trashTextField.getText());
+			moveToRightLabel.setText("move to " + favoritesTextField.getText());
+		} else if (changedList == trashFilesList) {
+			moveToRightLabel.setText("move to not reviewed");
+		} else if (changedList == favoritesFilesList) {
+			moveToLeftLabel.setText("move to not reviewed");
+		}
 	}
 
 	protected void readDirectory(File folder) {
@@ -309,8 +376,26 @@ public class ReviewView implements BaseView {
 		return moved;
 	}
 
-	public boolean moveItem(Integer globalIndex, String direction) {
+	public boolean moveItem(ImageInfo info, String direction) {
 		boolean moved = false;
+
+		JList sourceList = null;
+		Integer index = 0;
+
+		if (originModel.contains(info)) {
+			sourceList = originFilesList;
+			index = originModel.indexOf(info);
+		} else if (trashModel.contains(info)) {
+			sourceList = trashFilesList;
+			index = trashModel.indexOf(info);
+		} else if (favoritesModel.contains(info)) {
+			sourceList = favoritesFilesList;
+			index = favoritesModel.indexOf(info);
+		}
+
+		if (sourceList != null) {
+			moved = moveItem(sourceList, direction, index);
+		}
 
 		return moved;
 	}
@@ -319,10 +404,12 @@ public class ReviewView implements BaseView {
 		boolean moved = false;
 
 		JList targetList = null;
+		String targetName = "not reviewed";
 
 		if (direction.equals("left")) {
 			if (sourceList == originFilesList) {
 				targetList = trashFilesList;
+				targetName = trashTextField.getText();
 			} else if (sourceList == favoritesFilesList) {
 				targetList = originFilesList;
 			}
@@ -331,6 +418,7 @@ public class ReviewView implements BaseView {
 				targetList = originFilesList;
 			} else if (sourceList == originFilesList) {
 				targetList = favoritesFilesList;
+				targetName = favoritesTextField.getText();
 			}
 		}
 
@@ -344,9 +432,19 @@ public class ReviewView implements BaseView {
 				targetModel.addElement(info);
 				moved = true;
 
-				if (frame.isFocused() && sourceModel.getSize() > listIndexToMove) {
-					sourceList.requestFocusInWindow();
+				if (sourceModel.getSize() > listIndexToMove) {
 					sourceList.setSelectedIndex(listIndexToMove);
+				} else if (sourceModel.getSize() > 0) {
+					sourceList.setSelectedIndex(0);
+				}
+
+				if (frame.isFocused()) {
+					sourceList.requestFocusInWindow();
+				}
+
+				if (imageView != null) {
+					imageView.textLabel.setText(info.fileName + "moved to " + targetName);
+					imageView.textLabel.setVisible(true);
 				}
 
 			} catch (Exception e) {
@@ -359,17 +457,17 @@ public class ReviewView implements BaseView {
 
 	public void showImageFrame() {
 		if (imageView == null) {
-			imageView = new ImageView();
+			imageView = new PhotoView();
 		}
 
 		if (WindowManager.childFrame == null) {
 			WindowManager.createChildFrame("Image");
 			imageView.setFrame(WindowManager.childFrame);
 			WindowManager.maximizeFrame(WindowManager.childFrame);
-			WindowManager.showPanelInFrame(imageView, WindowManager.childFrame);
+			WindowManager.showPanelInFrame(imageView.getPanel(), WindowManager.childFrame);
 			WindowManager.childFrame.requestFocusInWindow();
 		} else if (!WindowManager.childFrame.isVisible()) {
-			WindowManager.showPanelInFrame(imageView, WindowManager.childFrame);
+			WindowManager.showPanelInFrame(imageView.getPanel(), WindowManager.childFrame);
 			WindowManager.childFrame.requestFocusInWindow();
 		} else if (!WindowManager.childFrame.isFocused()) {
 			WindowManager.childFrame.requestFocusInWindow();
@@ -386,7 +484,7 @@ public class ReviewView implements BaseView {
 
 			ImageInfo info = (ImageInfo) focusedList.getSelectedValue();
 
-			imageView.setImage(info.path);
+			imageView.setImage(info);
 			WindowManager.childFrame.setTitle(info.fileName);
 		}
 	}
@@ -398,7 +496,7 @@ public class ReviewView implements BaseView {
 			showImageFrame();
 			Integer selectedIndex = getSelectedIndexOfFocusedList();
 
-			if (selectedIndex > 0 && focusedList.getModel().getSize() > (selectedIndex + 1)) {
+			if (selectedIndex >= 0 && focusedList.getModel().getSize() > (selectedIndex + 1)) {
 				focusedList.setSelectedIndex(selectedIndex + 1);
 				showImage();
 			}

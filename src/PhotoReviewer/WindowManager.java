@@ -3,6 +3,7 @@ package PhotoReviewer;
 import PhotoReviewer.Core.BaseView;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class WindowManager {
 
@@ -30,12 +31,15 @@ public class WindowManager {
 	}
 
 	public static void showPanelInFrame(BaseView panel, JFrame frame) {
-		frame.setContentPane(panel.getPanel());
+		showPanelInFrame(panel.getPanel(), frame);
+		panel.panelShowed();
+	}
+
+	public static void showPanelInFrame(Container panel, JFrame frame) {
+		frame.setContentPane(panel);
 		frame.pack();
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-
-		panel.panelShowed();
 	}
 
 	public static void maximizeFrame(JFrame frame) {
