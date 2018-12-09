@@ -121,6 +121,11 @@ public class ReviewView implements BaseView {
 						case 27 :
 							WindowManager.disposeChildFrame();
 							break;
+						case 10 :
+							if (focusedComponent instanceof JList) {
+								showImage();
+							}
+							break;
 					}
 				}
 
@@ -134,21 +139,21 @@ public class ReviewView implements BaseView {
 		originFilesList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				listSelectedValueChanged(originFilesList, e);
+				listSelectedValueChanged(originFilesList);
 			}
 		});
 
 		trashFilesList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				listSelectedValueChanged(trashFilesList, e);
+				listSelectedValueChanged(trashFilesList);
 			}
 		});
 
 		favoritesFilesList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				listSelectedValueChanged(favoritesFilesList, e);
+				listSelectedValueChanged(favoritesFilesList);
 			}
 		});
 
@@ -282,7 +287,7 @@ public class ReviewView implements BaseView {
 		//endregion events
 	}
 
-	protected void listSelectedValueChanged(JList changedList, ListSelectionEvent event) {
+	protected void listSelectedValueChanged(JList changedList) {
 		moveToLeftLabel.setText("");
 		moveToRightLabel.setText("");
 
@@ -443,7 +448,7 @@ public class ReviewView implements BaseView {
 				}
 
 				if (imageView != null) {
-					imageView.textLabel.setText(info.fileName + "moved to " + targetName);
+					imageView.textLabel.setText(info.fileName + " moved to " + targetName);
 					imageView.textLabel.setVisible(true);
 				}
 

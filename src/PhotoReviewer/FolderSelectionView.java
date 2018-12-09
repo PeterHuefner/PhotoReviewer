@@ -10,7 +10,8 @@ import java.io.File;
 public class FolderSelectionView implements BaseView {
 	private JPanel  panel;
 	private JButton chooseFolderButton;
-	private JLabel welcomeLabel;
+	private JLabel  welcomeLabel;
+	private JButton showHelp;
 
 	public JPanel getPanel() {
 		return panel;
@@ -33,6 +34,15 @@ public class FolderSelectionView implements BaseView {
 					WindowManager.maximizeFrame(WindowManager.mainFrame);
 					WindowManager.showPanelInFrame(reviewView, WindowManager.mainFrame);
 				}
+			}
+		});
+
+		showHelp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				HelpView helpView = new HelpView();
+				WindowManager.createChildFrame("Help");
+				WindowManager.showPanelInFrame(helpView, WindowManager.childFrame);
 			}
 		});
 	}

@@ -6,21 +6,26 @@
       <xy x="20" y="20" width="500" height="400"/>
     </constraints>
     <properties>
-      <preferredSize width="400" height="400"/>
+      <preferredSize width="1280" height="800"/>
     </properties>
     <border type="none"/>
     <children>
       <scrollpane id="b7030">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="600" height="-1"/>
+          </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <horizontalScrollBarPolicy value="30"/>
+          <verticalScrollBarPolicy value="22"/>
+        </properties>
         <border type="none"/>
         <children>
           <component id="e5fca" class="javax.swing.JLabel">
             <constraints/>
             <properties>
-              <text value="&lt;html&gt;&#10;&lt;h1&gt;Help&lt;/h1&gt;&#10;&lt;p&gt;Lorem Ipsum&lt;/p&gt;&#10;&lt;/html&gt;"/>
+              <text value="&lt;html&gt;&#10;&lt;h1&gt;Help&lt;/h1&gt;&#10;&lt;p&gt;With PhotoReviewer you can select/mark images to 2 different lists (ex. favorites and trash).&lt;br&gt;The selected image-files can be copied, moved or deleted./p&gt;&#10;&lt;p&gt;The select procedure is done while viewing an image, simply with left and right cursor key.&lt;/p&gt;&#10;&lt;br&gt;&lt;br&gt;&#10;&lt;h2&gt;Step by Step Guide&lt;/h2&gt;&#10;&lt;p&gt;1. Select a folder from hard drive containing the photos you want to review. &#10;&lt;br&gt;A new window is opening.&lt;/p&gt;&#10;&#10;&lt;br&gt;&#10;&#10;&lt;p&gt;2. The new window has 3 lists in the middle and a control bar at the bottom. &#10;&lt;br&gt;Left and right lists are empty and are named &quot;trash&quot; and &quot;favorites&quot;. &#10;&lt;br&gt;These two lists can be renamed to whatever gaining your needs.&#10;&lt;br&gt;In this guide we will call them trash and favorites.&#10;&lt;br&gt;The list in the middle is named &quot;not reviewed&quot; and cannot be renamed.&#10;&lt;br&gt;All names of images readable by the application are listed here.&#10;&lt;/p&gt;&#10;&#10;&lt;br&gt;&#10;&#10;&lt;p&gt;3. Selecting an entry in a list and pressing the left or right cursor key, is moving the entry to left or roght list. You may also use the cursor buttons at the control bar.&#10;&lt;br&gt;Moving an entry does nothing with the imagefile on your hard drive.&#10;&lt;/p&gt;&#10;&#10;&lt;br&gt;&#10;&#10;&lt;p&gt;4. Double clicking or hit enter an entry opens a new window showing the selected image.&lt;br&gt;&#10;In this mode you can use the up and down keys to show next or previous image.&lt;br&gt;&#10;With the left and right key you can move the image to left or right list.&lt;br&gt;&#10;&lt;u&gt;After moving an image/entry, you stay in the opened list. That means after moving an image to the left or right and viewing the next or previous entry, you cannot go back to the last moved image, until closing the viewing window and start from the targeting list.&lt;/u&gt;&#10;&lt;/p&gt;&#10;&#10;&lt;br&gt;&#10;&#10;&lt;p&gt;5. When all images are moved to their lists you can copy, move or delete the trash or favorites by using the specified button under the list. Only at this time the application is changing the files on your hard drive as you instructed.&#10;&lt;/p&gt;&#10;&lt;/html&gt;"/>
               <verticalAlignment value="1"/>
             </properties>
           </component>
