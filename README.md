@@ -18,3 +18,11 @@ When Java is installed simply run the JAR-File via double click or java-command 
 ![choose folder](http://www.peterhuefner.de/PhotoReviewer_anleitung/1_choose_folder.png)
 ![list images](http://www.peterhuefner.de/PhotoReviewer_anleitung/2_review.png)
 ![view image](http://www.peterhuefner.de/PhotoReviewer_anleitung/3_view.png)
+
+## Feedback and bug reports
+
+Use the issue tracker in this repo or write an email to photoreviewer [(at)] peterhuefner.de.
+
+### Known issues
+
+Version 1.0 has no auto rotate based on EXIF-data. This is a planned feature for future releases. 
