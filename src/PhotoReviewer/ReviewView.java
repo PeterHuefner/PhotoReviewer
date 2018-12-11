@@ -1,6 +1,7 @@
 package PhotoReviewer;
 
 import PhotoReviewer.Core.BaseView;
+import PhotoReviewer.Core.FileWorker;
 import PhotoReviewer.Core.ImageInfo;
 
 import javax.swing.*;
@@ -11,10 +12,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class ReviewView implements BaseView {
 
@@ -66,6 +65,13 @@ public class ReviewView implements BaseView {
 
 	@Override
 	public void panelShowed() {
+		if (allFiles.size() == 0) {
+			JOptionPane.showMessageDialog(WindowManager.mainFrame, "No comatible images found in folder. Please choose another.", "folder seems empty", JOptionPane.PLAIN_MESSAGE);
+
+			WindowManager.mainFrame.dispose();
+			WindowManager.mainFrame.setExtendedState(JFrame.NORMAL);
+			WindowManager.showPanel(new FolderSelectionView());
+		}
 	}
 
 	public ReviewView(File directory, JFrame frame) {
@@ -113,10 +119,14 @@ public class ReviewView implements BaseView {
 							}
 							break;
 						case 40 :
-							showNextImage();
+							if (!frame.isFocused()) {
+								showNextImage();
+							}
 							break;
 						case 38 :
-							showPreviousImage();
+							if (!frame.isFocused()) {
+								showPreviousImage();
+							}
 							break;
 						case 27 :
 							WindowManager.disposeChildFrame();
@@ -283,12 +293,67 @@ public class ReviewView implements BaseView {
 			}
 		});
 
+		copyTrashButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				copyList(trashFilesList);
+			}
+		});
+
+		moveTrashButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				moveList(trashFilesList);
+			}
+		});
+
+		deleteTrashButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteList(trashFilesList);
+			}
+		});
+
+		clearTrashButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clearList(trashFilesList);
+			}
+		});
+
+		copyButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				copyList(favoritesFilesList);
+			}
+		});
+
+		moveButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				moveList(favoritesFilesList);
+			}
+		});
+
+		deleteButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteList(favoritesFilesList);
+			}
+		});
+
+		clearButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clearList(favoritesFilesList);
+			}
+		});
 
 		//endregion events
 	}
 
 	protected void listSelectedValueChanged(JList changedList) {
-		moveToLeftLabel.setText("");
+		/*moveToLeftLabel.setText("");
 		moveToRightLabel.setText("");
 
 		if (changedList == originFilesList) {
@@ -298,7 +363,7 @@ public class ReviewView implements BaseView {
 			moveToRightLabel.setText("move to not reviewed");
 		} else if (changedList == favoritesFilesList) {
 			moveToLeftLabel.setText("move to not reviewed");
-		}
+		}*/
 	}
 
 	protected void readDirectory(File folder) {
@@ -316,6 +381,12 @@ public class ReviewView implements BaseView {
 		};
 
 		File[] files = folder.listFiles(filenameFilter);
+		Arrays.sort(files, new Comparator<File>() {
+			@Override
+			public int compare(File o1, File o2) {
+				return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+			}
+		});
 
 		if (files != null) {
 			for (int i = 0; i < files.length; i++) {
@@ -329,7 +400,7 @@ public class ReviewView implements BaseView {
 					lastKey++;
 
 				} else if (files[i].isDirectory()) {
-					readDirectory(files[i]);
+					//readDirectory(files[i]);
 				}
 			}
 		}
@@ -519,6 +590,91 @@ public class ReviewView implements BaseView {
 				focusedList.setSelectedIndex(selectedIndex - 1);
 				showImage();
 			}
+		}
+	}
+
+	protected File getActionDestination() {
+		File destination = null;
+
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setDialogTitle("choose a target folder");
+
+		if (chooser.showOpenDialog(WindowManager.mainFrame) == JFileChooser.APPROVE_OPTION) {
+			destination = chooser.getSelectedFile();
+		}
+
+		return destination;
+	}
+
+	protected void handleListAction(JList sourceList, String action, String dialogTitle) {
+		File destination = null;
+
+		if (action.equals("copy") || action.equals("move")) {
+			destination = getActionDestination();
+		}
+
+		if (destination != null || action.equals("delete")) {
+			JOptionPane optionPane = new JOptionPane("collecting files", JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+			JDialog dialog = new JDialog();
+
+			dialog.setTitle(dialogTitle);
+			dialog.setModal(true);
+			dialog.setContentPane(optionPane);
+			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			dialog.pack();
+
+
+			FileWorker fileWorker = new FileWorker(sourceList, action, dialog, destination);
+			fileWorker.execute();
+
+			dialog.setVisible(true);
+		}
+
+	}
+
+	public void copyList(JList sourceList) {
+		handleListAction(sourceList, "copy", "copy files");
+	}
+
+	public void moveList(JList sourceList) {
+		handleListAction(sourceList, "move", "move files");
+	}
+
+	public void deleteList(JList sourceList) {
+		Integer userChoice = JOptionPane.showConfirmDialog(WindowManager.mainFrame, "Do you really want to delete all images in this list? This action can not be undone.", "confirm the removing of images", JOptionPane.YES_NO_OPTION);
+
+		if (userChoice == JOptionPane.YES_OPTION) {
+			handleListAction(sourceList, "delete", "delete files");
+		}
+	}
+
+	public void clearList(JList sourceList) {
+
+		int userChoice = JOptionPane.showOptionDialog(WindowManager.mainFrame, "Do you want entries moved back to 'not reviewed' or remove from list?\nRemoved entries are not accessible through application until you reopen and choose this folder again.", "move or remove entries", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"move", "remove", "cancel"}, "move");
+		DefaultListModel sourceModel = (DefaultListModel) sourceList.getModel();
+
+		switch (userChoice) {
+			case 0 :
+				String direction = "";
+
+				if (sourceList == trashFilesList) {
+					direction = "right";
+				} else {
+					direction = "left";
+				}
+
+				while (sourceModel.size() != 0) {
+					moveItem(sourceList, direction, 0);
+				}
+
+				break;
+			case 1 :
+				sourceModel.removeAllElements();
+				break;
+			case 2 :
+
+				break;
 		}
 	}
 }
