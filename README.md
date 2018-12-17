@@ -4,7 +4,7 @@ View images in a folder and mark them as favorite or trash. Marked images are in
 
 ## Download
 
-The lastest version can be downloaded [here](https://raw.githubusercontent.com/PeterHuefner/PhotoReviewer/builds/current/PhotoReviewer.jar).
+The lastest version can be downloaded [here](https://github.com/PeterHuefner/PhotoReviewer/blob/master/builds/current/PhotoReviewer.jar?raw=true).
 
 ## Installation
 
