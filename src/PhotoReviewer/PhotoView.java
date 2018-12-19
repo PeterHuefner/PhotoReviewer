@@ -94,13 +94,8 @@ public class PhotoView {
 
 			textLabel.setVisible(false);
 
-			if (imageIcon.getIconWidth() < maxWidth || imageIcon.getIconHeight() < maxHeight) {
-				imageLabel.setIcon(imageIcon);
-				resizedIcon = null;
-			} else {
-				resizedIcon = new ImageIcon(scaleImage(imageIcon, frame.getWidth(), frame.getHeight()));
-				imageLabel.setIcon(resizedIcon);
-			}
+			resizedIcon = new ImageIcon(scaleImage(imageIcon, frame.getWidth(), frame.getHeight()));
+			imageLabel.setIcon(resizedIcon);
 		}
 	}
 
