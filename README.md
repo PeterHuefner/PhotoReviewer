@@ -27,12 +27,12 @@ Use the issue tracker in this repo or write an email to photoreviewer [(at)] pet
 
 Version 1.0.* has no auto rotate based on EXIF-data. This is a planned feature for future releases.
 
-### Version history
+## Version history
 
-#### 1.0
+### 1.0
 
 Initial Release
 
-#### 1.0.1
+### 1.0.1
 
 - Bugfix: Some portrait images were not fully displayed
