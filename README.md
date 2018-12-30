@@ -36,3 +36,7 @@ Initial Release
 ### 1.0.1
 
 - Bugfix: Some portrait images were not fully displayed
+
+### 1.0.2
+
+- Bugfix: After moving an image the next image was skipped by pressing down-key. Now after moving an image the next image is shown automatically.

@@ -5,7 +5,7 @@ import javax.swing.*;
 public class Application {
 
 	final public static String name = "PhotoReviewer";
-	final public static String version = "1.0.1";
+	final public static String version = "1.0.2";
 
 	protected static FolderSelectionView folderSelectionView;
 

@@ -106,14 +106,14 @@ public class ReviewView implements BaseView {
 					switch (e.getKeyCode()) {
 						case 37 :
 							if (imageView != null && !frame.isFocused()) {
-								moveItem(imageView.getImageInfo(), "left");
+								moveImageFromPhotoView("left");
 							} else {
 								move("left");
 							}
 							break;
 						case 39 :
 							if (imageView != null && !frame.isFocused()) {
-								moveItem(imageView.getImageInfo(), "right");
+								moveImageFromPhotoView("right");
 							} else {
 								move("right");
 							}
@@ -455,21 +455,11 @@ public class ReviewView implements BaseView {
 	public boolean moveItem(ImageInfo info, String direction) {
 		boolean moved = false;
 
-		JList sourceList = null;
-		Integer index = 0;
-
-		if (originModel.contains(info)) {
-			sourceList = originFilesList;
-			index = originModel.indexOf(info);
-		} else if (trashModel.contains(info)) {
-			sourceList = trashFilesList;
-			index = trashModel.indexOf(info);
-		} else if (favoritesModel.contains(info)) {
-			sourceList = favoritesFilesList;
-			index = favoritesModel.indexOf(info);
-		}
+		JList sourceList = getListForImageInfo(info);
+		Integer index;
 
 		if (sourceList != null) {
+			index = ((DefaultListModel) sourceList.getModel()).indexOf(info);
 			moved = moveItem(sourceList, direction, index);
 		}
 
@@ -480,12 +470,10 @@ public class ReviewView implements BaseView {
 		boolean moved = false;
 
 		JList targetList = null;
-		String targetName = "not reviewed";
 
 		if (direction.equals("left")) {
 			if (sourceList == originFilesList) {
 				targetList = trashFilesList;
-				targetName = trashTextField.getText();
 			} else if (sourceList == favoritesFilesList) {
 				targetList = originFilesList;
 			}
@@ -494,7 +482,6 @@ public class ReviewView implements BaseView {
 				targetList = originFilesList;
 			} else if (sourceList == originFilesList) {
 				targetList = favoritesFilesList;
-				targetName = favoritesTextField.getText();
 			}
 		}
 
@@ -518,17 +505,54 @@ public class ReviewView implements BaseView {
 					sourceList.requestFocusInWindow();
 				}
 
-				if (imageView != null) {
-					imageView.textLabel.setText(info.fileName + " moved to " + targetName);
-					imageView.textLabel.setVisible(true);
-				}
-
 			} catch (Exception e) {
 
 			}
 		}
 
 		return moved;
+	}
+
+	protected JList getListForImageInfo (ImageInfo info) {
+		JList sourceList = null;
+
+		if (originModel.contains(info)) {
+			sourceList = originFilesList;
+		} else if (trashModel.contains(info)) {
+			sourceList = trashFilesList;
+		} else if (favoritesModel.contains(info)) {
+			sourceList = favoritesFilesList;
+		}
+
+		return sourceList;
+	}
+
+	public void moveImageFromPhotoView(String direction) {
+		ImageInfo currentImage = imageView.getImageInfo();
+		JList currentList = getListForImageInfo(currentImage);
+		Integer currentPosition = ((DefaultListModel) currentList.getModel()).indexOf(currentImage);
+
+		moveItem(currentImage, direction);
+
+		if (currentPosition >= 0) {
+			currentList.setSelectedIndex(currentPosition);
+			showImage();
+
+			if (imageView != null) {
+
+				JList targetList = getListForImageInfo(currentImage);
+				String targetName = "not reviewed";
+
+				if (targetList == trashFilesList) {
+					targetName = trashTextField.getText();
+				} else if (targetList == favoritesFilesList) {
+					targetName = favoritesTextField.getText();
+				}
+
+				imageView.textLabel.setText(currentImage.fileName + " moved to " + targetName);
+				imageView.textLabel.setVisible(true);
+			}
+		}
 	}
 
 	public void showImageFrame() {
