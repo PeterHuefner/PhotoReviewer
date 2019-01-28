@@ -2,6 +2,11 @@ package PhotoReviewer;
 
 import PhotoReviewer.Core.BaseView;
 import PhotoReviewer.Core.ImageInfo;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,12 +29,6 @@ public class PhotoView {
 	protected ImageIcon resizedIcon;
 
 	public PhotoView() {
-		/*panel.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				super.keyPressed(e);
-			}
-		});*/
 
 		panel = new JLayeredPane();
 		imageLabel = new JLabel();
@@ -74,6 +73,18 @@ public class PhotoView {
 		imageInfo = info;
 		imageIcon = new ImageIcon(imageInfo.path);
 		showImage();
+
+		try {
+			File     jpegFile = new File(imageInfo.path);
+			Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
+
+			Directory directory   = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			int       orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+
+			System.out.println(metadata.toString());
+		} catch (Exception e) {
+
+		}
 	}
 
 	public ImageInfo getImageInfo() {
