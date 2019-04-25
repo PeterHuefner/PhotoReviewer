@@ -16,12 +16,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.rmi.server.ExportException;
 
 public class PhotoView {
+	public    JLabel       textLabel;
 	protected JLayeredPane panel;
 	protected JLabel       imageLabel;
-	public    JLabel       textLabel;
-
 	protected JFrame    frame;
 	protected ImageInfo imageInfo;
 	protected ImageIcon imageIcon;
@@ -41,7 +41,7 @@ public class PhotoView {
 		textLabel.setVerticalAlignment(JLabel.CENTER);
 		textLabel.setOpaque(true);
 		textLabel.setBackground(new Color(255, 255, 255, 175));
-		textLabel.setForeground(new Color(0,0,0, 255));
+		textLabel.setForeground(new Color(0, 0, 0, 255));
 		textLabel.setVisible(false);
 
 
@@ -73,18 +73,6 @@ public class PhotoView {
 		imageInfo = info;
 		imageIcon = new ImageIcon(imageInfo.path);
 		showImage();
-
-		try {
-			File     jpegFile = new File(imageInfo.path);
-			Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
-
-			Directory directory   = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			int       orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-
-			System.out.println(metadata.toString());
-		} catch (Exception e) {
-
-		}
 	}
 
 	public ImageInfo getImageInfo() {
@@ -97,7 +85,7 @@ public class PhotoView {
 		int labelWidth  = 400;
 		int labelHeight = 100;
 
-		textLabel.setBounds((frame.getWidth() / 2) - (labelWidth / 2),frame.getHeight() - ((int) (labelHeight * 1.5)), labelWidth,labelHeight);
+		textLabel.setBounds((frame.getWidth() / 2) - (labelWidth / 2), frame.getHeight() - ((int) (labelHeight * 1.5)), labelWidth, labelHeight);
 
 		if (imageIcon != null) {
 			int maxWidth  = panel.getWidth();
@@ -105,19 +93,80 @@ public class PhotoView {
 
 			textLabel.setVisible(false);
 
-			resizedIcon = new ImageIcon(scaleImage(imageIcon, frame.getWidth(), frame.getHeight()));
+			int degrees = readExifAndGetRotation();
+			resizedIcon = new ImageIcon(rotateImage(imageIcon, degrees));
+
+			resizedIcon = new ImageIcon(scaleImage(resizedIcon, frame.getWidth(), frame.getHeight()));
 			imageLabel.setIcon(resizedIcon);
+		}
+	}
+
+	protected int readExifAndGetRotation() {
+		int degrees = 0;
+
+		try {
+			File     jpegFile = new File(imageInfo.path);
+			Metadata metadata = ImageMetadataReader.readMetadata(jpegFile);
+
+			Directory directory   = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			int       orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+
+			switch (orientation) {
+				case 6:
+					degrees = 90;
+					break;
+				case 3:
+					degrees = 180;
+					break;
+				case 8:
+					degrees = -90;
+					break;
+			}
+		} catch (Exception e) {
+
+		}
+
+		return degrees;
+	}
+
+	protected Image rotateImage(ImageIcon icon, int degrees) {
+		int targetWidth = icon.getIconWidth(), targetHeight = icon.getIconHeight();
+
+		switch (degrees) {
+			case 90:
+				targetWidth  = icon.getIconHeight();
+				targetHeight = icon.getIconWidth();
+				break;
+			case -90:
+				targetWidth  = icon.getIconHeight();
+				targetHeight = icon.getIconWidth();
+				break;
+		}
+
+		if (degrees != 0) {
+			BufferedImage rotatedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+
+			Graphics2D g2 = rotatedImage.createGraphics();
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2.rotate(Math.toRadians(degrees));
+
+			g2.drawImage(icon.getImage(), 0, 0, targetWidth, targetHeight, null);
+			g2.dispose();
+
+			return rotatedImage;
+		} else {
+			return icon.getImage();
 		}
 	}
 
 	protected Image scaleImage(ImageIcon icon, int maxWidth, int maxHeight) {
 		Image image = icon.getImage();
 
-		double imageHeight       = icon.getIconHeight();
-		double imageWidth        = icon.getIconWidth();
+		double imageHeight = icon.getIconHeight();
+		double imageWidth  = icon.getIconWidth();
 
-		double targetWidth       = maxWidth;
-		double targetHeight      = (imageHeight / imageWidth) * maxWidth;
+		double targetWidth  = maxWidth;
+		double targetHeight = (imageHeight / imageWidth) * maxWidth;
 
 		if (targetHeight > maxHeight) {
 			targetHeight = maxHeight;
